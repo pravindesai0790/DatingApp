@@ -37,18 +37,20 @@ namespace DatingApp.API
         {
             services.AddDbContext<DataContext>(x => x.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
-                .AddJsonOptions(opt => {
-                    opt.SerializerSettings.ReferenceLoopHandling = 
+                .AddJsonOptions(opt =>
+                {
+                    opt.SerializerSettings.ReferenceLoopHandling =
                         Newtonsoft.Json.ReferenceLoopHandling.Ignore;
                 });
             services.AddCors();
             services.Configure<CloudinarySettings>(Configuration.GetSection("CloudinarySettings"));
             services.AddAutoMapper();
             services.AddTransient<Seed>();
-            services.AddScoped<IAuthRepository, AuthRepository>(); 
+            services.AddScoped<IAuthRepository, AuthRepository>();
             services.AddScoped<IDatingRepository, DatingRepository>();
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(options => {
+                .AddJwtBearer(options =>
+                {
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
                         ValidateIssuerSigningKey = true,
@@ -58,6 +60,7 @@ namespace DatingApp.API
                         ValidateAudience = false
                     };
                 });
+            services.AddScoped<LogUserActivity>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -69,12 +72,14 @@ namespace DatingApp.API
             }
             else
             {
-                app.UseExceptionHandler(builder => { // Globale exception handler
-                    builder.Run(async context => { // 'context' contain the http responce object 
+                app.UseExceptionHandler(builder =>
+                { // Globale exception handler
+                    builder.Run(async context =>
+                    { // 'context' contain the http responce object 
                         context.Response.StatusCode = (int)HttpStatusCode.InternalServerError; // Get the status code from http responce
 
                         var error = context.Features.Get<IExceptionHandlerFeature>();
-                        if(error != null)
+                        if (error != null)
                         {
                             context.Response.AddApplicationError(error.Error.Message); // Extension method to add own header to http responce
                             await context.Response.WriteAsync(error.Error.Message);
